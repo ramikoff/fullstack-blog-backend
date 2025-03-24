@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name": "Wireless Headphones",
+    "image": "http://example.com/headphones.png",
+    "description": "High-quality wireless headphones with noise cancellation.",
+    "category": "Electronics",
+    "price": 199.99,
+    "stock": 25
+  },
+  {
+    "id": 2,
+    "name": "Smartphone",
+    "image": "http://example.com/smartphone.png",
+    "description": "Latest model smartphone with high-resolution camera and fast processor.",
+    "category": "Electronics",
+    "price": 899.99,
+    "stock": 15
+  },
+  {
+    "id": 3,
+    "name": "Running Shoes",
+    "image": "http://example.com/shoes.png",
+    "description": "Comfortable and lightweight running shoes for everyday training.",
+    "category": "Sportswear",
+    "price": 120.0,
+    "stock": 40
+  },
+  {
+    "id": 4,
+    "name": "Backpack",
+    "image": "http://example.com/backpack.png",
+    "description": "Durable and stylish backpack with multiple compartments.",
+    "category": "Accessories",
+    "price": 59.99,
+    "stock": 30
+  },
+  {
+    "id": 5,
+    "name": "Coffee Maker",
+    "image": "http://example.com/coffeemaker.png",
+    "description": "Automatic coffee maker with a built-in grinder.",
+    "category": "Home Appliances",
+    "price": 249.99,
+    "stock": 10
+  },
+  {
+    "id": 6,
+    "name": "Gaming Mouse",
+    "image": "http://example.com/mouse.png",
+    "description": "Ergonomic gaming mouse with customizable buttons and RGB lighting.",
+    "category": "Gaming",
+    "price": 79.99,
+    "stock": 50
+  }
+]
