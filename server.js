@@ -1,66 +1,119 @@
 import express from "express";
 import chalk from "chalk";
-import fs from "fs";
 
-const blogposts = JSON.parse(fs.readFileSync("./data.json", "utf8"));
+import { query } from "./db/index.js";
 
 const app = express();
 const jsonParser = express.json();
 app.use(jsonParser);
 
-app.get("/", (req, res) => {
-  //   res.send("Hello from express!");
-  const data = {
-    message: "Hello from express!",
-  };
-  res.json(data);
+app.get("/", async (req, res) => {
+  try {
+    const { rows } = await query("SELECT * FROM posts;");
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-app.post("/", (req, res) => {
-  res.status(201).json({
-    message: "Data created!",
-  });
+app.get("/blogposts", async (req, res) => {
+  try {
+    const { rows } = await query("SELECT * FROM posts;");
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-app.get("/blogposts", (req, res) => {
-  res.json(blogposts);
+app.get("/blogposts/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const { rows, rowCount } = await query(
+      "SELECT * FROM posts WHERE id = $1;",
+      [id]
+    );
+
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Post not found :(" });
+    }
+
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-app.get("/blogposts/:id", (req, res) => {
-  const { id } = req.params; // req.params is an object storing all the parameters
-  const blogpost = blogposts.find((blogpost) => blogpost.id === parseInt(id)); // parseInt converts string to number
-  res.json(blogpost);
+app.post("/blogposts", async (req, res) => {
+  const { title } = req.body;
+
+  if (!title) return res.status(400).json({ message: "Title required" });
+
+  try {
+    const { rows, rowCount } = await query(
+      "INSERT INTO posts (title) values ($1) RETURNING *;",
+      [title]
+    );
+
+    // console.log({ rows, rowCount });
+
+    res
+      .status(201)
+      .json({ message: "Post successfully created.", data: rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-app.post("/blogposts", (req, res) => {
-  req.body.id = blogposts.length + 1;
-  blogposts.push(req.body);
-  res.status(201).json({
-    message: "Data created!",
-    data: blogposts,
-  });
+app.put("/blogposts/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+
+  try {
+    const { rows, rowCount } = await query(
+      `
+        UPDATE posts
+          SET title = COALESCE($1, title)
+        WHERE id = $2
+        RETURNING *;
+      `,
+      [title, id]
+    );
+
+    // console.log({ rows, rowCount });
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Post not found :(" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Post successfully updated.", data: rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-app.put("/blogposts/:id", (req, res) => {
-  const { id } = req.params; // req.params is an object storing all the parameters
-  const body = req.body;
-  const blogpostInd = blogposts.findIndex(
-    (blogpost) => blogpost.id === parseInt(id)
-  ); // parseInt converts string to number
-  blogposts.splice(blogpostInd, 1, { ...body, id: parseInt(id) });
+app.delete("/blogposts/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows, rowCount } = await query(
+      "DELETE FROM posts WHERE id = $1 RETURNING *;",
+      [id]
+    );
 
-  res.json(blogposts);
-});
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Post not found :(" });
+    }
 
-app.delete("/blogposts/:id", (req, res) => {
-  const { id } = req.params; // req.params is an object storing all the parameters
-
-  const blogpostInd = blogposts.findIndex(
-    (blogpost) => blogpost.id === parseInt(id)
-  ); // parseInt converts string to number
-  blogposts.splice(blogpostInd, 1);
-
-  res.json(blogposts);
+    res.json({ message: "Post successfully updated.", data: rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 app.listen(3000, () => {
