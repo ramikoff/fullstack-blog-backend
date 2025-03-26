@@ -1,9 +1,17 @@
 import express from "express";
 import chalk from "chalk";
+import cors from "cors"; // Import cors
 
 import { query } from "./db/index.js";
 
 const app = express();
+const corsOptions = {
+  origin: "http://localhost:5173", // Replace this with the URL of your React app
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: "Content-Type,Authorization", // Allowed headers
+  credentials: true, // If you use cookies set to true
+};
+app.use(cors(corsOptions));
 const jsonParser = express.json();
 app.use(jsonParser);
 
@@ -28,6 +36,7 @@ app.get("/blogposts", async (req, res) => {
 });
 
 app.get("/blogposts/:id", async (req, res) => {
+  console.log("Received GET request to /blogposts/:id"); // Check if the request arrives
   const id = req.params.id;
   try {
     const { rows, rowCount } = await query(
@@ -47,28 +56,34 @@ app.get("/blogposts/:id", async (req, res) => {
 });
 
 app.post("/blogposts", async (req, res) => {
-  const { title } = req.body;
-
-  if (!title) return res.status(400).json({ message: "Title required" });
+  console.log("Received POST request to /blogposts"); // Check if the request arrives
+  console.log("Request body:", req.body); // Check the data
 
   try {
+    const { title, date, content, cover } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
     const { rows, rowCount } = await query(
-      "INSERT INTO posts (title) values ($1) RETURNING *;",
-      [title]
+      "INSERT INTO posts (title, date, content, cover) VALUES ($1, $2, $3, $4) RETURNING *",
+      [title, date, content, cover]
     );
 
-    // console.log({ rows, rowCount });
-
-    res
-      .status(201)
-      .json({ message: "Post successfully created.", data: rows[0] });
+    res.status(201).json({
+      message: "Post successfully created.",
+      data: rows[0],
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating post:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
 app.put("/blogposts/:id", async (req, res) => {
+  console.log("Received PUT request to /blogposts/:id"); // Check if the request arrives
+  console.log("Request body:", req.body); // Check the data
   const { id } = req.params;
   const { title } = req.body;
 
@@ -98,6 +113,8 @@ app.put("/blogposts/:id", async (req, res) => {
 });
 
 app.delete("/blogposts/:id", async (req, res) => {
+  console.log("Received DELETE request to /blogposts/:id"); // Check if the request arrives
+  console.log("Request body:", req.params); // Check the data
   const { id } = req.params;
   try {
     const { rows, rowCount } = await query(
