@@ -62,7 +62,7 @@ app.post("/blogposts", async (req, res) => {
   console.log("Request body:", req.body); // Check the data
 
   try {
-    const { title, date, content, cover } = req.body;
+    const { title, date, content, cover, author } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
@@ -70,7 +70,7 @@ app.post("/blogposts", async (req, res) => {
 
     const { rows, rowCount } = await query(
       "INSERT INTO posts (title, date, content, cover) VALUES ($1, $2, $3, $4) RETURNING *",
-      [title, date, content, cover]
+      [title, date, content, cover, author]
     );
 
     res.status(201).json({
