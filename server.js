@@ -69,7 +69,7 @@ app.post("/blogposts", async (req, res) => {
     }
 
     const { rows, rowCount } = await query(
-      "INSERT INTO posts (title, date, content, cover) VALUES ($1, $2, $3, $4) RETURNING *",
+      "INSERT INTO posts (title, date, content, cover, author) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [title, date, content, cover, author]
     );
 
@@ -87,7 +87,7 @@ app.put("/blogposts/:id", async (req, res) => {
   console.log("Received PUT request to /blogposts/:id"); // Check if the request arrives
   console.log("Request body:", req.body); // Check the data
   const { id } = req.params;
-  const { title, date, content, cover } = req.body;
+  const { title, date, content, cover, author } = req.body;
 
   try {
     const { rows, rowCount } = await query(
@@ -97,11 +97,12 @@ app.put("/blogposts/:id", async (req, res) => {
           title = COALESCE($1, title),
           date = COALESCE($2, date),
           content = COALESCE($3, content),
-          cover = COALESCE($4, cover)
-        WHERE id = $5
+          cover = COALESCE($4, cover),
+          author = COALESCE($5, cover),
+        WHERE id = $6
         RETURNING *;
       `,
-      [title, date, content, cover, id]
+      [title, date, content, cover, author, id]
     );
 
     // console.log({ rows, rowCount });
