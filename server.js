@@ -15,6 +15,8 @@ app.use(cors(corsOptions));
 const jsonParser = express.json();
 app.use(jsonParser);
 
+const port = process.env.PORT || 3000;
+
 app.get("/", async (req, res) => {
   try {
     const { rows } = await query("SELECT * FROM posts;");
@@ -85,17 +87,21 @@ app.put("/blogposts/:id", async (req, res) => {
   console.log("Received PUT request to /blogposts/:id"); // Check if the request arrives
   console.log("Request body:", req.body); // Check the data
   const { id } = req.params;
-  const { title } = req.body;
+  const { title, date, content, cover } = req.body;
 
   try {
     const { rows, rowCount } = await query(
       `
         UPDATE posts
-          SET title = COALESCE($1, title)
-        WHERE id = $2
+        SET
+          title = COALESCE($1, title),
+          date = COALESCE($2, date),
+          content = COALESCE($3, content),
+          cover = COALESCE($4, cover)
+        WHERE id = $5
         RETURNING *;
       `,
-      [title, id]
+      [title, date, content, cover, id]
     );
 
     // console.log({ rows, rowCount });
@@ -133,6 +139,6 @@ app.delete("/blogposts/:id", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
+app.listen(port, () => {
   console.log(chalk.green("Server is running on http://localhost:3000"));
 });
