@@ -98,7 +98,7 @@ app.put("/blogposts/:id", async (req, res) => {
           date = COALESCE($2, date),
           content = COALESCE($3, content),
           cover = COALESCE($4, cover),
-          author = COALESCE($5, author),
+          author = COALESCE($5, author)
         WHERE id = $6
         RETURNING *;
       `,
